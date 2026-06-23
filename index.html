@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Campeonato Profissional</title>
+<title>Campeonato Profissional - Modo Treinador</title>
 
 <style>
 body {
@@ -18,14 +18,14 @@ h1 { color: #00e676; }
 
 input {
   padding: 10px;
-  width: 200px;
-  border-radius: 6px;
+  width: 220px;
   border: none;
+  border-radius: 6px;
 }
 
 button {
   padding: 8px 10px;
-  margin: 5px;
+  margin: 4px;
   border: none;
   border-radius: 6px;
   cursor: pointer;
@@ -33,7 +33,9 @@ button {
 }
 
 .add { background:#00c853; color:white; }
-.play { background:#2196f3; color:white; }
+.winA { background:#2196f3; color:white; }
+.draw { background:#ffb300; color:black; }
+.winB { background:#9c27b0; color:white; }
 .reset { background:#e53935; color:white; }
 
 .match {
@@ -107,12 +109,8 @@ function addTeam() {
 
   teams.push({
     name,
-    p:0,
-    v:0,
-    e:0,
-    d:0,
-    gp:0,
-    gc:0
+    p:0, v:0, e:0, d:0,
+    gp:0, gc:0
   });
 
   document.getElementById("teamInput").value = "";
@@ -130,28 +128,44 @@ function generateMatches() {
       matches.push({
         a: i,
         b: j,
-        played: false,
-        scoreA: null,
-        scoreB: null
+        played: false
       });
     }
   }
 }
 
-function play(i) {
+// 🎮 MODELO TREINADOR (VOCÊ ESCOLHE)
+function play(i, result) {
   const m = matches[i];
   if (m.played) return;
 
   const A = teams[m.a];
   const B = teams[m.b];
 
-  // 🔥 PLACAR REALISTA
-  const golsA = Math.floor(Math.random() * 5);
-  const golsB = Math.floor(Math.random() * 5);
+  let golsA = 0;
+  let golsB = 0;
 
-  m.scoreA = golsA;
-  m.scoreB = golsB;
-  m.played = true;
+  if (result === "A") {
+    golsA = 2;
+    golsB = 0;
+
+    A.v++; A.p += 3;
+    B.d++;
+
+  } else if (result === "B") {
+    golsA = 0;
+    golsB = 2;
+
+    B.v++; B.p += 3;
+    A.d++;
+
+  } else {
+    golsA = 1;
+    golsB = 1;
+
+    A.e++; B.e++;
+    A.p++; B.p++;
+  }
 
   A.gp += golsA;
   A.gc += golsB;
@@ -159,16 +173,7 @@ function play(i) {
   B.gp += golsB;
   B.gc += golsA;
 
-  if (golsA > golsB) {
-    A.v++; A.p += 3;
-    B.d++;
-  } else if (golsB > golsA) {
-    B.v++; B.p += 3;
-    A.d++;
-  } else {
-    A.e++; B.e++;
-    A.p++; B.p++;
-  }
+  m.played = true;
 
   save();
   render();
@@ -183,9 +188,19 @@ function renderMatches() {
     el.className = "match";
 
     el.innerHTML = `
-      ${teams[m.a].name} ${m.scoreA ?? "?"} x ${m.scoreB ?? "?"} ${teams[m.b].name}
-      <br><br>
-      <button class="play" onclick="play(${i})">Jogar / Simular</button>
+      <b>${teams[m.a].name}</b> vs <b>${teams[m.b].name}</b><br><br>
+
+      <button class="winA" onclick="play(${i},'A')">
+        ${teams[m.a].name} vence
+      </button>
+
+      <button class="draw" onclick="play(${i},'E')">
+        Empate
+      </button>
+
+      <button class="winB" onclick="play(${i},'B')">
+        ${teams[m.b].name} vence
+      </button>
     `;
 
     div.appendChild(el);
