@@ -44,6 +44,17 @@ button {
   border-radius:8px;
 }
 
+.finished {
+  opacity: 0.6;
+  border: 1px solid #00e676;
+}
+
+.status {
+  font-size: 12px;
+  margin-top: 5px;
+  color: #00e676;
+}
+
 table {
   margin: 20px auto;
   width: 95%;
@@ -62,8 +73,11 @@ td {
   padding:10px;
   border-bottom:1px solid #333;
 }
-</style>
 
+.leader {
+  background: rgba(0, 230, 118, 0.15);
+}
+</style>
 </head>
 
 <body>
@@ -98,13 +112,10 @@ td {
 
 <script>
 let data = load();
-
 let teams = data.teams || [];
 let matches = data.matches || [];
 
-/* ---------------------------
-   CRIAR TIME
-----------------------------*/
+/* ------------------ TIME ------------------ */
 function addTeam() {
   const name = document.getElementById("teamInput").value.trim();
   if (!name) return;
@@ -122,9 +133,7 @@ function addTeam() {
   render();
 }
 
-/* ---------------------------
-   GERAR JOGOS (ida única)
-----------------------------*/
+/* ------------------ JOGOS ------------------ */
 function generateMatches() {
   matches = [];
 
@@ -141,9 +150,7 @@ function generateMatches() {
   }
 }
 
-/* ---------------------------
-   JOGAR PARTIDA
-----------------------------*/
+/* ------------------ JOGO ------------------ */
 function play(i, result) {
   const m = matches[i];
   if (m.played) return;
@@ -154,7 +161,6 @@ function play(i, result) {
   let ga = 0;
   let gb = 0;
 
-  // lógica controlada (sem bagunça)
   if (result === "A") {
     ga = 2;
     gb = Math.floor(Math.random() * 2);
@@ -191,35 +197,7 @@ function play(i, result) {
   render();
 }
 
-/* ---------------------------
-   RENDER JOGOS
-----------------------------*/
-function renderMatches() {
-  const div = document.getElementById("matches");
-  div.innerHTML = "";
-
-  matches.forEach((m, i) => {
-    const el = document.createElement("div");
-    el.className = "match";
-
-    el.innerHTML = `
-      <b>${teams[m.a].name}</b>
-      ${m.sa ?? "?"} x ${m.sb ?? "?"}
-      <b>${teams[m.b].name}</b>
-      <br><br>
-
-      <button onclick="play(${i},'A')">${teams[m.a].name} vence</button>
-      <button onclick="play(${i},'E')">Empate</button>
-      <button onclick="play(${i},'B')">${teams[m.b].name} vence</button>
-    `;
-
-    div.appendChild(el);
-  });
-}
-
-/* ---------------------------
-   RENDER TABELA
-----------------------------*/
+/* ------------------ TABELA ------------------ */
 function renderTable() {
   const t = document.getElementById("table");
   t.innerHTML = "";
@@ -230,6 +208,8 @@ function renderTable() {
 
   sorted.forEach((x,i)=>{
     const row = document.createElement("tr");
+
+    if (i === 0) row.classList.add("leader");
 
     row.innerHTML = `
       <td>${i+1}</td>
@@ -247,9 +227,36 @@ function renderTable() {
   });
 }
 
-/* ---------------------------
-   SAVE / LOAD
-----------------------------*/
+/* ------------------ JOGOS ------------------ */
+function renderMatches() {
+  const div = document.getElementById("matches");
+  div.innerHTML = "";
+
+  matches.forEach((m,i)=>{
+    const el = document.createElement("div");
+
+    el.className = "match";
+    if (m.played) el.classList.add("finished");
+
+    el.innerHTML = `
+      <b>${teams[m.a].name}</b>
+      ${m.sa ?? "-"} x ${m.sb ?? "-"}
+      <b>${teams[m.b].name}</b>
+
+      <div>
+        <button onclick="play(${i},'A')">A vence</button>
+        <button onclick="play(${i},'E')">Empate</button>
+        <button onclick="play(${i},'B')">B vence</button>
+      </div>
+
+      ${m.played ? `<div class="status">Jogo finalizado</div>` : ""}
+    `;
+
+    div.appendChild(el);
+  });
+}
+
+/* ------------------ STORAGE ------------------ */
 function save() {
   localStorage.setItem("campeonato", JSON.stringify({ teams, matches }));
 }
@@ -259,9 +266,7 @@ function load() {
   return d ? JSON.parse(d) : { teams: [], matches: [] };
 }
 
-/* ---------------------------
-   RESET
-----------------------------*/
+/* ------------------ RESET ------------------ */
 function resetChampionship() {
   teams = [];
   matches = [];
@@ -269,9 +274,7 @@ function resetChampionship() {
   render();
 }
 
-/* ---------------------------
-   RENDER GERAL
-----------------------------*/
+/* ------------------ RENDER ------------------ */
 function render() {
   renderMatches();
   renderTable();
