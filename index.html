@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Campeonato Profissional</title>
+<title>Football Manager Lite</title>
 
 <style>
 body {
@@ -19,8 +19,8 @@ h1 { color: #00e676; }
 input {
   padding: 10px;
   width: 220px;
-  border: none;
   border-radius: 6px;
+  border: none;
 }
 
 button {
@@ -47,6 +47,11 @@ button {
   border-radius:8px;
 }
 
+.rating {
+  font-size: 12px;
+  opacity: 0.7;
+}
+
 table {
   margin: 20px auto;
   width: 95%;
@@ -70,7 +75,7 @@ td {
 
 <body>
 
-<h1>Campeonato Profissional</h1>
+<h1>Football Manager Lite</h1>
 
 <input id="teamInput" placeholder="Nome do time">
 <button class="add" onclick="addTeam()">Adicionar time</button>
@@ -103,12 +108,14 @@ let data = load();
 let teams = data.teams || [];
 let matches = data.matches || [];
 
+// 🎯 cria time com força
 function addTeam() {
   const name = document.getElementById("teamInput").value.trim();
   if (!name) return;
 
   teams.push({
     name,
+    rating: randomRating(),
     p:0, v:0, e:0, d:0,
     gp:0, gc:0
   });
@@ -118,6 +125,10 @@ function addTeam() {
   generateMatches();
   save();
   render();
+}
+
+function randomRating() {
+  return Math.floor(60 + Math.random() * 40); // 60–100
 }
 
 function generateMatches() {
@@ -134,7 +145,7 @@ function generateMatches() {
   }
 }
 
-// 🔥 LÓGICA CONTROLADA (SEM BAGUNÇA)
+// ⚽ lógica realista baseada em força
 function play(i, result) {
   const m = matches[i];
   if (m.played) return;
@@ -145,26 +156,39 @@ function play(i, result) {
   let golsA = 0;
   let golsB = 0;
 
+  const diff = A.rating - B.rating;
+
+  // 🎯 base de performance
+  const baseA = Math.max(0, Math.round(1 + diff / 25 + Math.random() * 2));
+  const baseB = Math.max(0, Math.round(1 - diff / 25 + Math.random() * 2));
+
   if (result === "A") {
-    golsA = randomWinGoals();
-    golsB = randomLoseGoals();
+    golsA = Math.max(baseA, baseB + 1);
+    golsB = Math.floor(Math.random() * 2);
 
     A.v++; A.p += 3;
     B.d++;
 
   } else if (result === "B") {
-    golsB = randomWinGoals();
-    golsA = randomLoseGoals();
+    golsB = Math.max(baseB, baseA + 1);
+    golsA = Math.floor(Math.random() * 2);
 
     B.v++; B.p += 3;
     A.d++;
 
   } else {
-    golsA = randomDrawGoals();
-    golsB = golsA;
+    golsA = baseA;
+    golsB = baseB;
 
-    A.e++; B.e++;
-    A.p++; B.p++;
+    if (golsA === golsB) {
+      A.e++; B.e++;
+      A.p++; B.p++;
+    } else {
+      // força empate real
+      golsA = golsB = Math.min(golsA, golsB);
+      A.e++; B.e++;
+      A.p++; B.p++;
+    }
   }
 
   A.gp += golsA;
@@ -179,19 +203,6 @@ function play(i, result) {
   render();
 }
 
-// 🎯 PLACARES CONTROLADOS
-function randomWinGoals() {
-  return Math.random() < 0.5 ? 1 : 2; // 1 ou 2 gols
-}
-
-function randomLoseGoals() {
-  return Math.random() < 0.5 ? 0 : 1; // 0 ou 1 gol
-}
-
-function randomDrawGoals() {
-  return Math.random() < 0.5 ? 0 : 1; // 0–0 ou 1–1
-}
-
 function renderMatches() {
   const div = document.getElementById("matches");
   div.innerHTML = "";
@@ -201,7 +212,9 @@ function renderMatches() {
     el.className = "match";
 
     el.innerHTML = `
-      <b>${teams[m.a].name}</b> vs <b>${teams[m.b].name}</b><br><br>
+      <div class="rating">
+        ${teams[m.a].name} (${teams[m.a].rating}) vs ${teams[m.b].name} (${teams[m.b].rating})
+      </div><br>
 
       <button class="winA" onclick="play(${i},'A')">
         ${teams[m.a].name} vence
@@ -253,18 +266,18 @@ function render() {
 }
 
 function save() {
-  localStorage.setItem("campeonato", JSON.stringify({ teams, matches }));
+  localStorage.setItem("fm_lite", JSON.stringify({ teams, matches }));
 }
 
 function load() {
-  const d = localStorage.getItem("campeonato");
+  const d = localStorage.getItem("fm_lite");
   return d ? JSON.parse(d) : { teams: [], matches: [] };
 }
 
 function resetChampionship() {
   teams = [];
   matches = [];
-  localStorage.removeItem("campeonato");
+  localStorage.removeItem("fm_lite");
   render();
 }
 
