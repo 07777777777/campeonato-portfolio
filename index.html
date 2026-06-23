@@ -35,13 +35,12 @@ button {
 }
 
 .add { background:#00c853; color:white; }
-.win { background:#2196f3; color:white; }
-.draw { background:#ffb300; color:black; }
+.play { background:#2196f3; color:white; }
 .reset { background:#e53935; color:white; }
 
 table {
   margin: 20px auto;
-  width: 90%;
+  width: 95%;
   max-width: 1000px;
   border-collapse: collapse;
   background: #1c1c1c;
@@ -62,7 +61,7 @@ td {
 
 .match {
   background:#222;
-  width:90%;
+  width:95%;
   max-width:700px;
   margin:10px auto;
   padding:10px;
@@ -76,7 +75,7 @@ td {
 <h1>Campeonato Profissional</h1>
 
 <input id="teamInput" placeholder="Nome do time">
-<button class="add" onclick="addTeam()">Adicionar</button>
+<button class="add" onclick="addTeam()">Adicionar time</button>
 <button class="reset" onclick="resetChampionship()">Resetar</button>
 
 <h2>Jogos</h2>
@@ -107,8 +106,7 @@ let teams = data.teams || [];
 let matches = data.matches || [];
 
 function addTeam() {
-  const input = document.getElementById("teamInput");
-  const name = input.value.trim();
+  const name = document.getElementById("teamInput").value.trim();
   if (!name) return;
 
   teams.push({
@@ -121,7 +119,7 @@ function addTeam() {
     gc: 0
   });
 
-  input.value = "";
+  document.getElementById("teamInput").value = "";
 
   generateMatches();
   save();
@@ -142,26 +140,30 @@ function generateMatches() {
   }
 }
 
-function play(i, res) {
+function play(i) {
   const m = matches[i];
   if (m.played) return;
 
   const A = teams[m.a];
   const B = teams[m.b];
 
-  if (res === "a") {
+  // placar realista
+  const golsA = Math.floor(Math.random() * 5);
+  const golsB = Math.floor(Math.random() * 5);
+
+  A.gp += golsA;
+  A.gc += golsB;
+
+  B.gp += golsB;
+  B.gc += golsA;
+
+  if (golsA > golsB) {
     A.v++; A.p += 3;
     B.d++;
-    A.gp++; B.gc++;
-  }
-
-  if (res === "b") {
+  } else if (golsB > golsA) {
     B.v++; B.p += 3;
     A.d++;
-    B.gp++; A.gc++;
-  }
-
-  if (res === "e") {
+  } else {
     A.e++; B.e++;
     A.p++; B.p++;
   }
@@ -184,9 +186,7 @@ function renderMatches() {
 
     el.innerHTML = `
       ${teams[m.a].name} vs ${teams[m.b].name}<br><br>
-      <button class="win" onclick="play(${i},'a')">${teams[m.a].name}</button>
-      <button class="draw" onclick="play(${i},'e')">Empate</button>
-      <button class="win" onclick="play(${i},'b')">${teams[m.b].name}</button>
+      <button class="play" onclick="play(${i})">Jogar partida</button>
     `;
 
     div.appendChild(el);
