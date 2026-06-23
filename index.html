@@ -14,20 +14,18 @@ body {
   padding: 20px;
 }
 
-h1 {
-  color: #00e676;
-}
+h1 { color: #00e676; }
 
 input {
   padding: 10px;
-  width: 220px;
-  border: none;
+  width: 200px;
   border-radius: 6px;
+  border: none;
 }
 
 button {
-  padding: 7px 10px;
-  margin: 3px;
+  padding: 8px 10px;
+  margin: 5px;
   border: none;
   border-radius: 6px;
   cursor: pointer;
@@ -38,14 +36,21 @@ button {
 .play { background:#2196f3; color:white; }
 .reset { background:#e53935; color:white; }
 
+.match {
+  background:#222;
+  width:90%;
+  max-width:700px;
+  margin:10px auto;
+  padding:10px;
+  border-radius:8px;
+}
+
 table {
   margin: 20px auto;
   width: 95%;
   max-width: 1000px;
   border-collapse: collapse;
-  background: #1c1c1c;
-  border-radius: 10px;
-  overflow: hidden;
+  background:#1c1c1c;
 }
 
 th {
@@ -57,15 +62,6 @@ th {
 td {
   padding:10px;
   border-bottom:1px solid #333;
-}
-
-.match {
-  background:#222;
-  width:95%;
-  max-width:700px;
-  margin:10px auto;
-  padding:10px;
-  border-radius:8px;
 }
 </style>
 </head>
@@ -111,12 +107,12 @@ function addTeam() {
 
   teams.push({
     name,
-    p: 0,
-    v: 0,
-    e: 0,
-    d: 0,
-    gp: 0,
-    gc: 0
+    p:0,
+    v:0,
+    e:0,
+    d:0,
+    gp:0,
+    gc:0
   });
 
   document.getElementById("teamInput").value = "";
@@ -134,7 +130,9 @@ function generateMatches() {
       matches.push({
         a: i,
         b: j,
-        played: false
+        played: false,
+        scoreA: null,
+        scoreB: null
       });
     }
   }
@@ -147,9 +145,13 @@ function play(i) {
   const A = teams[m.a];
   const B = teams[m.b];
 
-  // placar realista
+  // 🔥 PLACAR REALISTA
   const golsA = Math.floor(Math.random() * 5);
   const golsB = Math.floor(Math.random() * 5);
+
+  m.scoreA = golsA;
+  m.scoreB = golsB;
+  m.played = true;
 
   A.gp += golsA;
   A.gc += golsB;
@@ -168,8 +170,6 @@ function play(i) {
     A.p++; B.p++;
   }
 
-  m.played = true;
-
   save();
   render();
 }
@@ -179,14 +179,13 @@ function renderMatches() {
   div.innerHTML = "";
 
   matches.forEach((m, i) => {
-    if (m.played) return;
-
     const el = document.createElement("div");
     el.className = "match";
 
     el.innerHTML = `
-      ${teams[m.a].name} vs ${teams[m.b].name}<br><br>
-      <button class="play" onclick="play(${i})">Jogar partida</button>
+      ${teams[m.a].name} ${m.scoreA ?? "?"} x ${m.scoreB ?? "?"} ${teams[m.b].name}
+      <br><br>
+      <button class="play" onclick="play(${i})">Jogar / Simular</button>
     `;
 
     div.appendChild(el);
@@ -197,15 +196,15 @@ function renderTable() {
   const t = document.getElementById("table");
   t.innerHTML = "";
 
-  let sorted = [...teams].sort((a, b) =>
+  let sorted = [...teams].sort((a,b)=>
     b.p - a.p || (b.gp - b.gc) - (a.gp - a.gc)
   );
 
-  sorted.forEach((x, i) => {
+  sorted.forEach((x,i)=>{
     const row = document.createElement("tr");
 
     row.innerHTML = `
-      <td>${i + 1}</td>
+      <td>${i+1}</td>
       <td>${x.name}</td>
       <td>${x.p}</td>
       <td>${x.v}</td>
