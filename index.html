@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Football Manager Lite</title>
+<title>Campeonato Profissional</title>
 
 <style>
 body {
@@ -25,7 +25,7 @@ input {
 
 button {
   padding: 8px 10px;
-  margin: 4px;
+  margin: 5px;
   border: none;
   border-radius: 6px;
   cursor: pointer;
@@ -33,9 +33,6 @@ button {
 }
 
 .add { background:#00c853; color:white; }
-.winA { background:#2196f3; color:white; }
-.draw { background:#ffb300; color:black; }
-.winB { background:#9c27b0; color:white; }
 .reset { background:#e53935; color:white; }
 
 .match {
@@ -45,11 +42,6 @@ button {
   margin:10px auto;
   padding:10px;
   border-radius:8px;
-}
-
-.rating {
-  font-size: 12px;
-  opacity: 0.7;
 }
 
 table {
@@ -71,11 +63,12 @@ td {
   border-bottom:1px solid #333;
 }
 </style>
+
 </head>
 
 <body>
 
-<h1>Football Manager Lite</h1>
+<h1>Campeonato Profissional</h1>
 
 <input id="teamInput" placeholder="Nome do time">
 <button class="add" onclick="addTeam()">Adicionar time</button>
@@ -105,17 +98,19 @@ td {
 
 <script>
 let data = load();
+
 let teams = data.teams || [];
 let matches = data.matches || [];
 
-// 🎯 cria time com força
+/* ---------------------------
+   CRIAR TIME
+----------------------------*/
 function addTeam() {
   const name = document.getElementById("teamInput").value.trim();
   if (!name) return;
 
   teams.push({
     name,
-    rating: randomRating(),
     p:0, v:0, e:0, d:0,
     gp:0, gc:0
   });
@@ -127,10 +122,9 @@ function addTeam() {
   render();
 }
 
-function randomRating() {
-  return Math.floor(60 + Math.random() * 40); // 60–100
-}
-
+/* ---------------------------
+   GERAR JOGOS (ida única)
+----------------------------*/
 function generateMatches() {
   matches = [];
 
@@ -139,13 +133,17 @@ function generateMatches() {
       matches.push({
         a: i,
         b: j,
-        played: false
+        played: false,
+        sa: null,
+        sb: null
       });
     }
   }
 }
 
-// ⚽ lógica realista baseada em força
+/* ---------------------------
+   JOGAR PARTIDA
+----------------------------*/
 function play(i, result) {
   const m = matches[i];
   if (m.played) return;
@@ -153,56 +151,49 @@ function play(i, result) {
   const A = teams[m.a];
   const B = teams[m.b];
 
-  let golsA = 0;
-  let golsB = 0;
+  let ga = 0;
+  let gb = 0;
 
-  const diff = A.rating - B.rating;
-
-  // 🎯 base de performance
-  const baseA = Math.max(0, Math.round(1 + diff / 25 + Math.random() * 2));
-  const baseB = Math.max(0, Math.round(1 - diff / 25 + Math.random() * 2));
-
+  // lógica controlada (sem bagunça)
   if (result === "A") {
-    golsA = Math.max(baseA, baseB + 1);
-    golsB = Math.floor(Math.random() * 2);
+    ga = 2;
+    gb = Math.floor(Math.random() * 2);
 
     A.v++; A.p += 3;
     B.d++;
 
   } else if (result === "B") {
-    golsB = Math.max(baseB, baseA + 1);
-    golsA = Math.floor(Math.random() * 2);
+    gb = 2;
+    ga = Math.floor(Math.random() * 2);
 
     B.v++; B.p += 3;
     A.d++;
 
   } else {
-    golsA = baseA;
-    golsB = baseB;
+    ga = 1;
+    gb = 1;
 
-    if (golsA === golsB) {
-      A.e++; B.e++;
-      A.p++; B.p++;
-    } else {
-      // força empate real
-      golsA = golsB = Math.min(golsA, golsB);
-      A.e++; B.e++;
-      A.p++; B.p++;
-    }
+    A.e++; B.e++;
+    A.p++; B.p++;
   }
 
-  A.gp += golsA;
-  A.gc += golsB;
+  A.gp += ga;
+  A.gc += gb;
 
-  B.gp += golsB;
-  B.gc += golsA;
+  B.gp += gb;
+  B.gc += ga;
 
+  m.sa = ga;
+  m.sb = gb;
   m.played = true;
 
   save();
   render();
 }
 
+/* ---------------------------
+   RENDER JOGOS
+----------------------------*/
 function renderMatches() {
   const div = document.getElementById("matches");
   div.innerHTML = "";
@@ -212,32 +203,28 @@ function renderMatches() {
     el.className = "match";
 
     el.innerHTML = `
-      <div class="rating">
-        ${teams[m.a].name} (${teams[m.a].rating}) vs ${teams[m.b].name} (${teams[m.b].rating})
-      </div><br>
+      <b>${teams[m.a].name}</b>
+      ${m.sa ?? "?"} x ${m.sb ?? "?"}
+      <b>${teams[m.b].name}</b>
+      <br><br>
 
-      <button class="winA" onclick="play(${i},'A')">
-        ${teams[m.a].name} vence
-      </button>
-
-      <button class="draw" onclick="play(${i},'E')">
-        Empate
-      </button>
-
-      <button class="winB" onclick="play(${i},'B')">
-        ${teams[m.b].name} vence
-      </button>
+      <button onclick="play(${i},'A')">${teams[m.a].name} vence</button>
+      <button onclick="play(${i},'E')">Empate</button>
+      <button onclick="play(${i},'B')">${teams[m.b].name} vence</button>
     `;
 
     div.appendChild(el);
   });
 }
 
+/* ---------------------------
+   RENDER TABELA
+----------------------------*/
 function renderTable() {
   const t = document.getElementById("table");
   t.innerHTML = "";
 
-  let sorted = [...teams].sort((a,b)=>
+  const sorted = [...teams].sort((a,b)=>
     b.p - a.p || (b.gp - b.gc) - (a.gp - a.gc)
   );
 
@@ -260,25 +247,34 @@ function renderTable() {
   });
 }
 
-function render() {
-  renderMatches();
-  renderTable();
-}
-
+/* ---------------------------
+   SAVE / LOAD
+----------------------------*/
 function save() {
-  localStorage.setItem("fm_lite", JSON.stringify({ teams, matches }));
+  localStorage.setItem("campeonato", JSON.stringify({ teams, matches }));
 }
 
 function load() {
-  const d = localStorage.getItem("fm_lite");
+  const d = localStorage.getItem("campeonato");
   return d ? JSON.parse(d) : { teams: [], matches: [] };
 }
 
+/* ---------------------------
+   RESET
+----------------------------*/
 function resetChampionship() {
   teams = [];
   matches = [];
-  localStorage.removeItem("fm_lite");
+  localStorage.removeItem("campeonato");
   render();
+}
+
+/* ---------------------------
+   RENDER GERAL
+----------------------------*/
+function render() {
+  renderMatches();
+  renderTable();
 }
 
 render();
