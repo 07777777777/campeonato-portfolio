@@ -1,12 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-  <meta charset="UTF-8">
-  <title>Campeonato Portfólio</title>
-</head>
-<body><!DOCTYPE html>
-<html lang="pt-br">
-<head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Campeonato Profissional</title>
@@ -47,7 +41,8 @@ button {
 
 table {
   margin: 20px auto;
-  width: 1000px;
+  width: 90%;
+  max-width: 1000px;
   border-collapse: collapse;
   background: #1c1c1c;
   border-radius: 10px;
@@ -67,7 +62,8 @@ td {
 
 .match {
   background:#222;
-  width:700px;
+  width:90%;
+  max-width:700px;
   margin:10px auto;
   padding:10px;
   border-radius:8px;
@@ -81,7 +77,7 @@ td {
 
 <input id="teamInput" placeholder="Nome do time">
 <button class="add" onclick="addTeam()">Adicionar</button>
-<button class="reset" onclick="resetChampionship()">Resetar Campeonato</button>
+<button class="reset" onclick="resetChampionship()">Resetar</button>
 
 <h2>Jogos</h2>
 <div id="matches"></div>
@@ -107,14 +103,12 @@ td {
 
 <script>
 let data = load();
-
 let teams = data.teams || [];
 let matches = data.matches || [];
 
 function addTeam() {
   const input = document.getElementById("teamInput");
   const name = input.value.trim();
-
   if (!name) return;
 
   teams.push({
@@ -150,7 +144,6 @@ function generateMatches() {
 
 function play(i, res) {
   const m = matches[i];
-
   if (m.played) return;
 
   const A = teams[m.a];
@@ -209,10 +202,47 @@ function renderTable() {
   );
 
   sorted.forEach((x, i) => {
-    const row = document.createElement("
+    const row = document.createElement("tr");
 
-  <h1>Campeonato Portfólio</h1>
-  <p>Site funcionando no GitHub Pages</p>
+    row.innerHTML = `
+      <td>${i + 1}</td>
+      <td>${x.name}</td>
+      <td>${x.p}</td>
+      <td>${x.v}</td>
+      <td>${x.e}</td>
+      <td>${x.d}</td>
+      <td>${x.gp}</td>
+      <td>${x.gc}</td>
+      <td>${x.gp - x.gc}</td>
+    `;
+
+    t.appendChild(row);
+  });
+}
+
+function render() {
+  renderMatches();
+  renderTable();
+}
+
+function save() {
+  localStorage.setItem("campeonato", JSON.stringify({ teams, matches }));
+}
+
+function load() {
+  const d = localStorage.getItem("campeonato");
+  return d ? JSON.parse(d) : { teams: [], matches: [] };
+}
+
+function resetChampionship() {
+  teams = [];
+  matches = [];
+  localStorage.removeItem("campeonato");
+  render();
+}
+
+render();
+</script>
 
 </body>
 </html>
