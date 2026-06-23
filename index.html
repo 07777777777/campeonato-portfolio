@@ -54,14 +54,19 @@ button {
 }
 
 .finished {
-  opacity: 0.55;
+  opacity: 0.4;
   border-left: 4px solid #00e676;
+  pointer-events: none;
 }
 
 .status {
   font-size: 12px;
   margin-top: 6px;
   color: #00e676;
+}
+
+.hidden {
+  display: none;
 }
 
 table {
@@ -103,203 +108,4 @@ tr:hover td {
 <h1>Campeonato Profissional</h1>
 
 <input id="teamInput" placeholder="Nome do time">
-<button class="add" onclick="addTeam()">Adicionar time</button>
-<button class="reset" onclick="resetChampionship()">Resetar</button>
-
-<h2>Jogos</h2>
-<div id="matches"></div>
-
-<h2>Tabela</h2>
-
-<table>
-<thead>
-<tr>
-<th>Pos</th>
-<th>Time</th>
-<th>P</th>
-<th>V</th>
-<th>E</th>
-<th>D</th>
-<th>GP</th>
-<th>GC</th>
-<th>SG</th>
-</tr>
-</thead>
-<tbody id="table"></tbody>
-</table>
-
-<script>
-let data = load();
-let teams = data.teams || [];
-let matches = data.matches || [];
-
-/* ----------------- ADD TIME ----------------- */
-function addTeam() {
-  const name = document.getElementById("teamInput").value.trim();
-  if (!name) return;
-
-  teams.push({
-    name,
-    p:0, v:0, e:0, d:0,
-    gp:0, gc:0
-  });
-
-  document.getElementById("teamInput").value = "";
-
-  generateMatches();
-  save();
-  render();
-}
-
-/* ----------------- GERAR JOGOS ----------------- */
-function generateMatches() {
-  matches = [];
-
-  for (let i = 0; i < teams.length; i++) {
-    for (let j = i + 1; j < teams.length; j++) {
-      matches.push({
-        a: i,
-        b: j,
-        played: false,
-        sa: null,
-        sb: null
-      });
-    }
-  }
-}
-
-/* ----------------- JOGAR PARTIDA ----------------- */
-function play(i, result) {
-  const m = matches[i];
-  if (m.played) return;
-
-  const A = teams[m.a];
-  const B = teams[m.b];
-
-  let ga = 0;
-  let gb = 0;
-
-  if (result === "A") {
-    ga = 2;
-    gb = Math.floor(Math.random() * 2);
-
-    A.v++; A.p += 3;
-    B.d++;
-
-  } else if (result === "B") {
-    gb = 2;
-    ga = Math.floor(Math.random() * 2);
-
-    B.v++; B.p += 3;
-    A.d++;
-
-  } else {
-    ga = 1;
-    gb = 1;
-
-    A.e++; B.e++;
-    A.p++; B.p++;
-  }
-
-  A.gp += ga;
-  A.gc += gb;
-
-  B.gp += gb;
-  B.gc += ga;
-
-  m.sa = ga;
-  m.sb = gb;
-  m.played = true;
-
-  save();
-  render();
-}
-
-/* ----------------- JOGOS ----------------- */
-function renderMatches() {
-  const div = document.getElementById("matches");
-  div.innerHTML = "";
-
-  matches.forEach((m,i)=>{
-    const el = document.createElement("div");
-
-    el.className = "match";
-    if (m.played) el.classList.add("finished");
-
-    el.innerHTML = `
-      <b>${teams[m.a].name}</b>
-      ${m.sa ?? "-"} x ${m.sb ?? "-"}
-      <b>${teams[m.b].name}</b>
-
-      <div>
-        <button onclick="play(${i},'A')">A vence</button>
-        <button onclick="play(${i},'E')">Empate</button>
-        <button onclick="play(${i},'B')">B vence</button>
-      </div>
-
-      ${m.played ? `<div class="status">Finalizado</div>` : ""}
-    `;
-
-    div.appendChild(el);
-  });
-}
-
-/* ----------------- TABELA ----------------- */
-function renderTable() {
-  const t = document.getElementById("table");
-  t.innerHTML = "";
-
-  const sorted = [...teams].sort((a,b)=>
-    b.p - a.p || (b.gp - b.gc) - (a.gp - a.gc)
-  );
-
-  sorted.forEach((x,i)=>{
-    const row = document.createElement("tr");
-
-    if (i === 0) row.classList.add("leader");
-
-    row.innerHTML = `
-      <td>${i+1}</td>
-      <td>${x.name}</td>
-      <td>${x.p}</td>
-      <td>${x.v}</td>
-      <td>${x.e}</td>
-      <td>${x.d}</td>
-      <td>${x.gp}</td>
-      <td>${x.gc}</td>
-      <td>${x.gp - x.gc}</td>
-    `;
-
-    t.appendChild(row);
-  });
-}
-
-/* ----------------- STORAGE ----------------- */
-function save() {
-  localStorage.setItem("campeonato", JSON.stringify({ teams, matches }));
-}
-
-function load() {
-  const d = localStorage.getItem("campeonato");
-  return d ? JSON.parse(d) : { teams: [], matches: [] };
-}
-
-/* ----------------- RESET ----------------- */
-function resetChampionship() {
-  teams = [];
-  matches = [];
-  localStorage.removeItem("campeonato");
-  render();
-}
-
-/* ----------------- RENDER ----------------- */
-function render() {
-  renderMatches();
-  renderTable();
-}
-
-render();
-</script>
-
-</body>
-</html>
+<button class="add" onclick="addTeam()">
