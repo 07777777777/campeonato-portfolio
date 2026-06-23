@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Campeonato Profissional - Modo Treinador</title>
+<title>Campeonato Profissional</title>
 
 <style>
 body {
@@ -134,7 +134,7 @@ function generateMatches() {
   }
 }
 
-// 🎮 MODELO TREINADOR (VOCÊ ESCOLHE)
+// 🔥 LÓGICA CONTROLADA (SEM BAGUNÇA)
 function play(i, result) {
   const m = matches[i];
   if (m.played) return;
@@ -146,22 +146,22 @@ function play(i, result) {
   let golsB = 0;
 
   if (result === "A") {
-    golsA = 2;
-    golsB = 0;
+    golsA = randomWinGoals();
+    golsB = randomLoseGoals();
 
     A.v++; A.p += 3;
     B.d++;
 
   } else if (result === "B") {
-    golsA = 0;
-    golsB = 2;
+    golsB = randomWinGoals();
+    golsA = randomLoseGoals();
 
     B.v++; B.p += 3;
     A.d++;
 
   } else {
-    golsA = 1;
-    golsB = 1;
+    golsA = randomDrawGoals();
+    golsB = golsA;
 
     A.e++; B.e++;
     A.p++; B.p++;
@@ -177,6 +177,19 @@ function play(i, result) {
 
   save();
   render();
+}
+
+// 🎯 PLACARES CONTROLADOS
+function randomWinGoals() {
+  return Math.random() < 0.5 ? 1 : 2; // 1 ou 2 gols
+}
+
+function randomLoseGoals() {
+  return Math.random() < 0.5 ? 0 : 1; // 0 ou 1 gol
+}
+
+function randomDrawGoals() {
+  return Math.random() < 0.5 ? 0 : 1; // 0–0 ou 1–1
 }
 
 function renderMatches() {
