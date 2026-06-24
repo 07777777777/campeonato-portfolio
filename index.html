@@ -37,7 +37,7 @@ button{
 
 .section{margin-top:20px;}
 
-/* JOGOS */
+/* JOGOS EM ANDAMENTO */
 .match{
   background:#1e1e1e;
   width:90%;
@@ -46,35 +46,34 @@ button{
   padding:12px;
   border-radius:10px;
   transition:0.25s;
-  border-left:4px solid transparent;
-  border-right:4px solid transparent;
 }
 
 .match:hover{
   transform:translateY(-3px);
-  box-shadow:0 10px 25px rgba(0,0,0,0.6);
+  box-shadow:0 10px 25px rgba(0,230,118,0.15);
 }
 
-/* JOGO FINALIZADO (O QUE VOCÊ QUERIA) */
-.match.done{
-  opacity:0.55;
-  border-left:5px solid #00e676;
-  border-right:5px solid #00e676;
-}
-
-/* FINALIZADOS */
+/* RESULTADOS FINALIZADOS (AQUI É O FOCO) */
 .card{
   background:#111;
   width:90%;
   max-width:700px;
   margin:10px auto;
-  padding:10px;
+  padding:12px;
   border-radius:10px;
+
   border-left:4px solid #00e676;
   border-right:4px solid #00e676;
+
+  transition:0.25s;
 }
 
-/* TABELA SIMPLES (DEIXAMOS DEPOIS MAIS FORTE) */
+.card:hover{
+  transform:translateY(-5px);
+  box-shadow:0 15px 30px rgba(0,230,118,0.25);
+}
+
+/* TABELA */
 table{
   margin:20px auto;
   width:95%;
@@ -83,6 +82,12 @@ table{
   background:#1c1c1c;
   border-radius:10px;
   overflow:hidden;
+  transition:0.25s;
+}
+
+table:hover{
+  transform:translateY(-4px);
+  box-shadow:0 10px 25px rgba(0,0,0,0.6);
 }
 
 th{
@@ -94,6 +99,12 @@ th{
 td{
   padding:10px;
   border-bottom:1px solid #333;
+}
+
+/* PRIMEIRO LUGAR DESTACADO */
+.leader{
+  background:rgba(0,230,118,0.18);
+  font-weight:bold;
 }
 </style>
 </head>
@@ -114,6 +125,26 @@ td{
 <div class="section">
 <h2>Jogos Finalizados</h2>
 <div id="finished"></div>
+</div>
+
+<div class="section">
+<h2>Tabela do Campeonato</h2>
+<table>
+<thead>
+<tr>
+<th>Pos</th>
+<th>Time</th>
+<th>P</th>
+<th>V</th>
+<th>E</th>
+<th>D</th>
+<th>GP</th>
+<th>GC</th>
+<th>SG</th>
+</tr>
+</thead>
+<tbody id="table"></tbody>
+</table>
 </div>
 
 <script>
@@ -196,18 +227,12 @@ function renderMatches(){
   });
 }
 
+/* RESULTADOS FINALIZADOS (CORRIGIDO) */
 function renderFinished(){
   const div=document.getElementById("finished");
   div.innerHTML="";
 
-  const finished = matches.filter(m=>m.played);
-
-  if(finished.length===0){
-    div.innerHTML="<p>Nenhum jogo finalizado ainda</p>";
-    return;
-  }
-
-  finished.forEach(m=>{
+  matches.filter(m=>m.played).forEach(m=>{
     const el=document.createElement("div");
     el.className="card";
 
@@ -219,9 +244,40 @@ function renderFinished(){
   });
 }
 
+/* TABELA */
+function renderTable(){
+  const t=document.getElementById("table");
+  t.innerHTML="";
+
+  let sorted=[...teams].sort((a,b)=>
+    b.p-a.p||(b.gp-b.gc)-(a.gp-a.gc)
+  );
+
+  sorted.forEach((x,i)=>{
+    const row=document.createElement("tr");
+
+    if(i===0) row.classList.add("leader");
+
+    row.innerHTML=`
+      <td>${i+1}</td>
+      <td>${x.name}</td>
+      <td>${x.p}</td>
+      <td>${x.v}</td>
+      <td>${x.e}</td>
+      <td>${x.d}</td>
+      <td>${x.gp}</td>
+      <td>${x.gc}</td>
+      <td>${x.gp-x.gc}</td>
+    `;
+
+    t.appendChild(row);
+  });
+}
+
 function render(){
   renderMatches();
   renderFinished();
+  renderTable();
 }
 
 function resetChampionship(){
