@@ -29,6 +29,7 @@ button {
   border-radius: 6px;
   border: none;
   cursor: pointer;
+  font-weight: bold;
 }
 
 .add { background:#00c853; color:white; }
@@ -41,6 +42,13 @@ button {
   margin:10px auto;
   padding:10px;
   border-radius:8px;
+  transition:0.2s;
+}
+
+.match.done {
+  opacity:0.4;
+  border-left:4px solid #00e676;
+  pointer-events:none;
 }
 
 table {
@@ -103,8 +111,7 @@ function addTeam() {
 
   teams.push({
     name,
-    p:0, v:0, e:0, d:0,
-    gp:0, gc:0
+    p:0,v:0,e:0,d:0,gp:0,gc:0
   });
 
   document.getElementById("teamInput").value = "";
@@ -156,10 +163,10 @@ function renderMatches(){
   div.innerHTML = "";
 
   matches.forEach((m,i)=>{
-    if (m.played) return;
-
     const el = document.createElement("div");
-    el.className="match";
+    el.className = "match";
+
+    if (m.played) el.classList.add("done");
 
     el.innerHTML = `
       ${teams[m.a].name} vs ${teams[m.b].name}<br><br>
