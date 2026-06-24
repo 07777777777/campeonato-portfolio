@@ -6,52 +6,72 @@
 <title>Campeonato Profissional</title>
 
 <style>
-body {
-  font-family: Arial;
-  background: #0d0d0d;
-  color: white;
-  text-align: center;
-  padding: 20px;
+body{
+  font-family:Arial;
+  background:#0d0d0d;
+  color:white;
+  text-align:center;
+  padding:20px;
 }
 
-h1 { color: #00e676; }
+h1{color:#00e676;}
 
-input {
-  padding: 10px;
-  width: 220px;
-  border-radius: 6px;
-  border: none;
+input{
+  padding:10px;
+  width:220px;
+  border:none;
+  border-radius:6px;
 }
 
-button {
-  padding: 8px;
-  margin: 5px;
-  border-radius: 6px;
-  border: none;
-  cursor: pointer;
-  font-weight: bold;
+button{
+  padding:8px;
+  margin:5px;
+  border:none;
+  border-radius:6px;
+  cursor:pointer;
+  font-weight:bold;
 }
 
-.add { background:#00c853; color:white; }
-.reset { background:#e53935; color:white; }
+.add{background:#00c853;color:white;}
+.reset{background:#e53935;color:white;}
 
-.match {
+.section{
+  margin-top:20px;
+}
+
+/* JOGOS */
+.match{
   background:#1e1e1e;
   width:90%;
   max-width:700px;
   margin:10px auto;
-  padding:10px;
-  border-radius:8px;
+  padding:12px;
+  border-radius:10px;
   transition:0.2s;
 }
 
-.match.done {
+.match.done{
   opacity:0.4;
   border-left:4px solid #00e676;
-  pointer-events:none;
 }
 
-table {
+/* HISTÓRICO (FLUTUANTE) */
+.history{
+  margin-top:30px;
+}
+
+.card{
+  background:#111;
+  width:90%;
+  max-width:700px;
+  margin:10px auto;
+  padding:10px;
+  border-radius:10px;
+  border:1px solid #333;
+}
+
+/* TABELA */
+table{
   margin:20px auto;
   width:95%;
   max-width:900px;
@@ -59,13 +79,13 @@ table {
   background:#1c1c1c;
 }
 
-th {
+th{
   background:#00e676;
   color:black;
   padding:10px;
 }
 
-td {
+td{
   padding:10px;
   border-bottom:1px solid #333;
 }
@@ -80,95 +100,86 @@ td {
 <button class="add" onclick="addTeam()">Adicionar</button>
 <button class="reset" onclick="resetChampionship()">Resetar</button>
 
+<div class="section">
 <h2>Jogos</h2>
 <div id="matches"></div>
+</div>
 
+<div class="section history">
+<h2>Jogos Encerrados</h2>
+<div id="finished"></div>
+</div>
+
+<div class="section">
 <h2>Tabela</h2>
 <table>
 <thead>
 <tr>
-<th>Pos</th>
-<th>Time</th>
-<th>P</th>
-<th>V</th>
-<th>E</th>
-<th>D</th>
-<th>GP</th>
-<th>GC</th>
-<th>SG</th>
+<th>Pos</th><th>Time</th><th>P</th><th>V</th><th>E</th><th>D</th><th>GP</th><th>GC</th><th>SG</th>
 </tr>
 </thead>
 <tbody id="table"></tbody>
 </table>
+</div>
 
 <script>
-let teams = [];
-let matches = [];
+let teams=[];
+let matches=[];
 
-function addTeam() {
-  const name = document.getElementById("teamInput").value.trim();
-  if (!name) return;
+function addTeam(){
+  const name=document.getElementById("teamInput").value.trim();
+  if(!name)return;
 
-  teams.push({
-    name,
-    p:0,v:0,e:0,d:0,gp:0,gc:0
-  });
-
-  document.getElementById("teamInput").value = "";
+  teams.push({name,p:0,v:0,e:0,d:0,gp:0,gc:0});
+  document.getElementById("teamInput").value="";
 
   generateMatches();
   render();
 }
 
-function generateMatches() {
-  matches = [];
-
-  for (let i=0;i<teams.length;i++){
-    for (let j=i+1;j<teams.length;j++){
-      matches.push({a:i,b:j,played:false});
+function generateMatches(){
+  matches=[];
+  for(let i=0;i<teams.length;i++){
+    for(let j=i+1;j<teams.length;j++){
+      matches.push({a:i,b:j,played:false,sa:0,sb:0});
     }
   }
 }
 
 function play(i,res){
-  const m = matches[i];
-  if (m.played) return;
+  const m=matches[i];
+  if(m.played)return;
 
-  const A = teams[m.a];
-  const B = teams[m.b];
+  const A=teams[m.a];
+  const B=teams[m.b];
 
-  if (res==="a"){
-    A.v++; A.p+=3;
-    B.d++;
-    A.gp++; B.gc++;
-  }
+  let ga=0,gb=0;
 
-  if (res==="b"){
-    B.v++; B.p+=3;
-    A.d++;
-    B.gp++; A.gc++;
-  }
+  if(res==="a"){ga=2;gb=0;A.v++;A.p+=3;B.d++;}
+  if(res==="b"){gb=2;ga=0;B.v++;B.p+=3;A.d++;}
+  if(res==="e"){ga=1;gb=1;A.e++;B.e++;A.p++;B.p++;}
 
-  if (res==="e"){
-    A.e++; B.e++;
-    A.p++; B.p++;
-  }
+  A.gp+=ga;A.gc+=gb;
+  B.gp+=gb;B.gc+=ga;
 
-  m.played = true;
+  m.sa=ga;
+  m.sb=gb;
+  m.played=true;
+
   render();
 }
 
 function renderMatches(){
-  const div = document.getElementById("matches");
-  div.innerHTML = "";
+  const div=document.getElementById("matches");
+  div.innerHTML="";
 
   matches.forEach((m,i)=>{
-    const el = document.createElement("div");
-    el.className = "match";
+    if(m.played)return;
 
-    if (m.played) el.classList.add("done");
+    const el=document.createElement("div");
+    el.className="match";
 
-    el.innerHTML = `
+    el.innerHTML=`
       ${teams[m.a].name} vs ${teams[m.b].name}<br><br>
       <button onclick="play(${i},'a')">A vence</button>
       <button onclick="play(${i},'e')">Empate</button>
@@ -179,18 +190,34 @@ function renderMatches(){
   });
 }
 
-function renderTable(){
-  const t = document.getElementById("table");
-  t.innerHTML = "";
+function renderFinished(){
+  const div=document.getElementById("finished");
+  div.innerHTML="";
 
-  let sorted = [...teams].sort((a,b)=>
-    b.p - a.p || (b.gp-b.gc)-(a.gp-a.gc)
+  matches.filter(m=>m.played).forEach(m=>{
+    const el=document.createElement("div");
+    el.className="card";
+
+    el.innerHTML=`
+      ${teams[m.a].name} ${m.sa} x ${m.sb} ${teams[m.b].name}
+    `;
+
+    div.appendChild(el);
+  });
+}
+
+function renderTable(){
+  const t=document.getElementById("table");
+  t.innerHTML="";
+
+  let sorted=[...teams].sort((a,b)=>
+    b.p-a.p||(b.gp-b.gc)-(a.gp-a.gc)
   );
 
   sorted.forEach((x,i)=>{
-    const row = document.createElement("tr");
+    const row=document.createElement("tr");
 
-    row.innerHTML = `
+    row.innerHTML=`
       <td>${i+1}</td>
       <td>${x.name}</td>
       <td>${x.p}</td>
@@ -208,12 +235,13 @@ function renderTable(){
 
 function render(){
   renderMatches();
+  renderFinished();
   renderTable();
 }
 
 function resetChampionship(){
-  teams = [];
-  matches = [];
+  teams=[];
+  matches=[];
   render();
 }
 </script>
