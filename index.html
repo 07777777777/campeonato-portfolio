@@ -7,7 +7,7 @@
 
 <style>
 body {
-  font-family: Arial, sans-serif;
+  font-family: Arial;
   background: #0d0d0d;
   color: white;
   text-align: center;
@@ -26,10 +26,9 @@ input {
 button {
   padding: 8px;
   margin: 5px;
-  border: none;
   border-radius: 6px;
+  border: none;
   cursor: pointer;
-  font-weight: bold;
 }
 
 .add { background:#00c853; color:white; }
@@ -45,10 +44,10 @@ button {
 }
 
 table {
-  margin: 20px auto;
-  width: 95%;
-  max-width: 900px;
-  border-collapse: collapse;
+  margin:20px auto;
+  width:95%;
+  max-width:900px;
+  border-collapse:collapse;
   background:#1c1c1c;
 }
 
@@ -99,8 +98,7 @@ let teams = [];
 let matches = [];
 
 function addTeam() {
-  const input = document.getElementById("teamInput");
-  const name = input.value.trim();
+  const name = document.getElementById("teamInput").value.trim();
   if (!name) return;
 
   teams.push({
@@ -109,7 +107,8 @@ function addTeam() {
     gp:0, gc:0
   });
 
-  input.value = "";
+  document.getElementById("teamInput").value = "";
+
   generateMatches();
   render();
 }
