@@ -1,256 +1,104 @@
-Pular para o conteúdo
-07777777777
-Campeonato-portfólio
-Navegação por repositórios
-Código
-Questões
-Solicitações de puxar
-Agentes
-Ações
-Projetos
-Wiki
-Segurança e qualidade
-Percepções
-Configurações
-Commit 010ce80
-07777777777
-07777777777
-autor
-há 18 minutos
-·
-·
-Verificado
-Refatoração index.html com ajustes de estilo e novos elementos
-Removeram classes CSS não utilizadas e ajustaram estilos para h1, elementos de botão e tabela. Adicionei um botão de reset e atualizei a estrutura HTML para partidas e tabela.
-Principal
-1 parent 
-89c7dea
- commit 
-010ce80
-1 arquivo alterado
-
-+150
--45
-Linhas alteradas: 150 adições e 45 remoções
-Árvore de arquivos
-Arquivos de filtro...
-index.html
-Busca dentro do código
- 
-‎index.html‎
-+150
--45
-Linhas alteradas: 150 adições e 45 remoções
++21
+-21
+Linhas alteradas: 21 adições e 21 eliminações
 Número original da linha do arquivo	Número da linha diferencial	Mudança de linha diferencial
-@@ -14,10 +14,7 @@
-  padding: 20px;
+@@ -35,13 +35,12 @@
 }
 
-h1 {
-  color: #00e676;
-  letter-spacing: 1px;
-}
-h1 { color: #00e676; }
-
-input {
-  padding: 10px;
-@@ -27,7 +24,7 @@
-}
-
-button {
-  padding: 8px 10px;
-  padding: 8px;
-  margin: 5px;
-  border: none;
-  border-radius: 6px;
-@@ -43,69 +40,177 @@
-  width:90%;
-  max-width:700px;
-  margin:10px auto;
-  padding:12px;
-  border-radius:10px;
-  border: 1px solid #333;
-  transition: 0.2s;
-}
-.match:hover {
-  transform: scale(1.01);
-}
-.finished {
-  opacity: 0.4;
-  border-left: 4px solid #00e676;
-  pointer-events: none;
-}
-.status {
-  font-size: 12px;
-  margin-top: 6px;
-  color: #00e676;
-}
-.hidden {
-  display: none;
-  padding:10px;
-  border-radius:8px;
-}
+.add { background:#00c853; color:white; }
+.win { background:#2196f3; color:white; }
+.draw { background:#ffb300; color:black; }
+.play { background:#2196f3; color:white; }
+.reset { background:#e53935; color:white; }
 
 table {
   margin: 20px auto;
+  width: 90%;
   width: 95%;
   max-width: 1000px;
-  max-width: 900px;
   border-collapse: collapse;
-  background:#1c1c1c;
-  border-radius: 10px;
-  overflow: hidden;
-}
+  background: #1c1c1c;
+@@ -62,7 +61,7 @@
 
-th {
-  background:#00e676;
-  color:black;
-  padding:12px;
-  font-size: 14px;
+.match {
+  background:#222;
+  width:90%;
+  width:95%;
+  max-width:700px;
+  margin:10px auto;
   padding:10px;
-}
-
-td {
-  padding:10px;
-  border-bottom:1px solid #333;
-}
-tr:hover td {
-  background:#2a2a2a;
-}
-.leader {
-  background: rgba(0, 230, 118, 0.12);
-  font-weight: bold;
-}
-</style>
-</head>
-
-<body>
-
+@@ -76,7 +75,7 @@
 <h1>Campeonato Profissional</h1>
 
 <input id="teamInput" placeholder="Nome do time">
-<button class="add" onclick="addTeam()">
 <button class="add" onclick="addTeam()">Adicionar</button>
+<button class="add" onclick="addTeam()">Adicionar time</button>
 <button class="reset" onclick="resetChampionship()">Resetar</button>
+
 <h2>Jogos</h2>
-<div id="matches"></div>
-<h2>Tabela</h2>
-<table>
-<thead>
-<tr>
-<th>Pos</th>
-<th>Time</th>
-<th>P</th>
-<th>V</th>
-<th>E</th>
-<th>D</th>
-<th>GP</th>
-<th>GC</th>
-<th>SG</th>
-</tr>
-</thead>
-<tbody id="table"></tbody>
-</table>
-<script>
-let teams = [];
-let matches = [];
+@@ -107,8 +106,7 @@ <h2>Tabela</h2>
+let matches = data.matches || [];
+
 function addTeam() {
   const input = document.getElementById("teamInput");
   const name = input.value.trim();
+  const name = document.getElementById("teamInput").value.trim();
   if (!name) return;
+
   teams.push({
-    name,
-    p:0, v:0, e:0, d:0,
-    gp:0, gc:0
+@@ -121,7 +119,7 @@ <h2>Tabela</h2>
+    gc: 0
   });
+
   input.value = "";
+  document.getElementById("teamInput").value = "";
+
   generateMatches();
-  render();
-}
-function generateMatches() {
-  matches = [];
-  for (let i=0;i<teams.length;i++){
-    for (let j=i+1;j<teams.length;j++){
-      matches.push({a:i,b:j,played:false});
-    }
+  save();
+@@ -142,26 +140,30 @@ <h2>Tabela</h2>
   }
 }
-function play(i,res){
+
+function play(i, res) {
+function play(i) {
   const m = matches[i];
   if (m.played) return;
+
   const A = teams[m.a];
   const B = teams[m.b];
-  if (res==="a"){
-    A.v++; A.p+=3;
+
+  if (res === "a") {
+  // placar realista
+  const golsA = Math.floor(Math.random() * 5);
+  const golsB = Math.floor(Math.random() * 5);
+  A.gp += golsA;
+  A.gc += golsB;
+  B.gp += golsB;
+  B.gc += golsA;
+  if (golsA > golsB) {
+    A.v++; A.p += 3;
     B.d++;
     A.gp++; B.gc++;
   }
-  if (res==="b"){
-    B.v++; B.p+=3;
+  if (res === "b") {
+  } else if (golsB > golsA) {
+    B.v++; B.p += 3;
     A.d++;
     B.gp++; A.gc++;
   }
-  if (res==="e"){
+  if (res === "e") {
+  } else {
     A.e++; B.e++;
     A.p++; B.p++;
   }
-  m.played = true;
-  render();
-}
-function renderMatches(){
-  const div = document.getElementById("matches");
-  div.innerHTML = "";
-  matches.forEach((m,i)=>{
-    if (m.played) return;
-    const el = document.createElement("div");
-    el.className="match";
+@@ -184,9 +186,7 @@ <h2>Tabela</h2>
+
     el.innerHTML = `
       ${teams[m.a].name} vs ${teams[m.b].name}<br><br>
-      <button onclick="play(${i},'a')">A vence</button>
-      <button onclick="play(${i},'e')">Empate</button>
-      <button onclick="play(${i},'b')">B vence</button>
+      <button class="win" onclick="play(${i},'a')">${teams[m.a].name}</button>
+      <button class="draw" onclick="play(${i},'e')">Empate</button>
+      <button class="win" onclick="play(${i},'b')">${teams[m.b].name}</button>
+      <button class="play" onclick="play(${i})">Jogar partida</button>
     `;
-    div.appendChild(el);
-  });
-}
-function renderTable(){
-  const t = document.getElementById("table");
-  t.innerHTML = "";
-  let sorted = [...teams].sort((a,b)=>
-    b.p - a.p || (b.gp-b.gc)-(a.gp-a.gc)
-  );
-  sorted.forEach((x,i)=>{
-    const row = document.createElement("tr");
-    row.innerHTML = `
-      <td>${i+1}</td>
-      <td>${x.name}</td>
-      <td>${x.p}</td>
-      <td>${x.v}</td>
-      <td>${x.e}</td>
-      <td>${x.d}</td>
-      <td>${x.gp}</td>
-      <td>${x.gc}</td>
-      <td>${x.gp-x.gc}</td>
-    `;
-    t.appendChild(row);
-  });
-}
-function render(){
-  renderMatches();
-  renderTable();
-}
-function resetChampionship(){
-  teams = [];
-  matches = [];
-  render();
-}
-</script>
-</body>
-</html>
-0 comentários de commit
-Comentários
-0
- (0)
-Comentário
-Você não está recebendo notificações deste tópico.
 
+    div.appendChild(el);
