@@ -1,104 +1,229 @@
-+21
--21
-Linhas alteradas: 21 adições e 21 eliminações
-Número original da linha do arquivo	Número da linha diferencial	Mudança de linha diferencial
-@@ -35,13 +35,12 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Campeonato Profissional</title>
+
+<style>
+body{
+  font-family:Arial;
+  background:#0d0d0d;
+  color:white;
+  text-align:center;
+  padding:20px;
 }
 
-.add { background:#00c853; color:white; }
-.win { background:#2196f3; color:white; }
-.draw { background:#ffb300; color:black; }
-.play { background:#2196f3; color:white; }
-.reset { background:#e53935; color:white; }
+h1{color:#00e676;}
 
-table {
-  margin: 20px auto;
-  width: 90%;
-  width: 95%;
-  max-width: 1000px;
-  border-collapse: collapse;
-  background: #1c1c1c;
-@@ -62,7 +61,7 @@
+input{
+  padding:10px;
+  width:220px;
+  border:none;
+  border-radius:6px;
+}
 
-.match {
-  background:#222;
+button{
+  padding:8px;
+  margin:5px;
+  border:none;
+  border-radius:6px;
+  cursor:pointer;
+}
+
+.add{background:#00c853;color:white;}
+.reset{background:#e53935;color:white;}
+
+.match{
+  background:#1e1e1e;
   width:90%;
-  width:95%;
   max-width:700px;
   margin:10px auto;
   padding:10px;
-@@ -76,7 +75,7 @@
+  border-radius:8px;
+}
+
+.match.done{
+  opacity:0.5;
+}
+
+table{
+  margin:20px auto;
+  width:95%;
+  max-width:900px;
+  border-collapse:collapse;
+  background:#1c1c1c;
+}
+
+th{
+  background:#00e676;
+  color:black;
+  padding:10px;
+}
+
+td{
+  padding:10px;
+  border-bottom:1px solid #333;
+}
+
+.leader{
+  background:rgba(0,230,118,0.15);
+  font-weight:bold;
+}
+</style>
+</head>
+
+<body>
+
 <h1>Campeonato Profissional</h1>
 
 <input id="teamInput" placeholder="Nome do time">
 <button class="add" onclick="addTeam()">Adicionar</button>
-<button class="add" onclick="addTeam()">Adicionar time</button>
 <button class="reset" onclick="resetChampionship()">Resetar</button>
 
 <h2>Jogos</h2>
-@@ -107,8 +106,7 @@ <h2>Tabela</h2>
-let matches = data.matches || [];
+<div id="matches"></div>
 
-function addTeam() {
-  const input = document.getElementById("teamInput");
-  const name = input.value.trim();
+<h2>Tabela</h2>
+<table>
+<thead>
+<tr>
+<th>Pos</th>
+<th>Time</th>
+<th>P</th>
+<th>V</th>
+<th>E</th>
+<th>D</th>
+<th>GP</th>
+<th>GC</th>
+<th>SG</th>
+</tr>
+</thead>
+<tbody id="table"></tbody>
+</table>
+
+<script>
+let teams = [];
+let matches = [];
+
+function addTeam(){
   const name = document.getElementById("teamInput").value.trim();
-  if (!name) return;
+  if(!name) return;
 
   teams.push({
-@@ -121,7 +119,7 @@ <h2>Tabela</h2>
-    gc: 0
+    name,
+    p:0,
+    v:0,
+    e:0,
+    d:0,
+    gp:0,
+    gc:0
   });
 
-  input.value = "";
   document.getElementById("teamInput").value = "";
-
   generateMatches();
-  save();
-@@ -142,26 +140,30 @@ <h2>Tabela</h2>
+  render();
+}
+
+function generateMatches(){
+  matches = [];
+
+  for(let i=0;i<teams.length;i++){
+    for(let j=i+1;j<teams.length;j++){
+      matches.push({a:i,b:j,played:false});
+    }
   }
 }
 
-function play(i, res) {
-function play(i) {
+function play(i,res){
   const m = matches[i];
-  if (m.played) return;
+  if(m.played) return;
 
   const A = teams[m.a];
   const B = teams[m.b];
 
-  if (res === "a") {
-  // placar realista
-  const golsA = Math.floor(Math.random() * 5);
-  const golsB = Math.floor(Math.random() * 5);
-  A.gp += golsA;
-  A.gc += golsB;
-  B.gp += golsB;
-  B.gc += golsA;
-  if (golsA > golsB) {
-    A.v++; A.p += 3;
+  if(res === "a"){
+    A.v++; A.p+=3;
     B.d++;
     A.gp++; B.gc++;
   }
-  if (res === "b") {
-  } else if (golsB > golsA) {
-    B.v++; B.p += 3;
+
+  if(res === "b"){
+    B.v++; B.p+=3;
     A.d++;
     B.gp++; A.gc++;
   }
-  if (res === "e") {
-  } else {
+
+  if(res === "e"){
     A.e++; B.e++;
     A.p++; B.p++;
   }
-@@ -184,9 +186,7 @@ <h2>Tabela</h2>
+
+  m.played = true;
+  render();
+}
+
+function renderMatches(){
+  const div = document.getElementById("matches");
+  div.innerHTML = "";
+
+  matches.forEach((m,i)=>{
+    const el = document.createElement("div");
+    el.className = "match";
+
+    if(m.played) el.classList.add("done");
 
     el.innerHTML = `
       ${teams[m.a].name} vs ${teams[m.b].name}<br><br>
-      <button class="win" onclick="play(${i},'a')">${teams[m.a].name}</button>
-      <button class="draw" onclick="play(${i},'e')">Empate</button>
-      <button class="win" onclick="play(${i},'b')">${teams[m.b].name}</button>
-      <button class="play" onclick="play(${i})">Jogar partida</button>
+      <button onclick="play(${i},'a')">${teams[m.a].name}</button>
+      <button onclick="play(${i},'e')">Empate</button>
+      <button onclick="play(${i},'b')">${teams[m.b].name}</button>
     `;
 
     div.appendChild(el);
+  });
+}
+
+function renderTable(){
+  const t = document.getElementById("table");
+  t.innerHTML = "";
+
+  let sorted = [...teams].sort((a,b)=>
+    b.p - a.p || (b.gp-b.gc)-(a.gp-a.gc)
+  );
+
+  sorted.forEach((x,i)=>{
+    const row = document.createElement("tr");
+
+    if(i === 0) row.classList.add("leader");
+
+    row.innerHTML = `
+      <td>${i+1}</td>
+      <td>${x.name}</td>
+      <td>${x.p}</td>
+      <td>${x.v}</td>
+      <td>${x.e}</td>
+      <td>${x.d}</td>
+      <td>${x.gp}</td>
+      <td>${x.gc}</td>
+      <td>${x.gp - x.gc}</td>
+    `;
+
+    t.appendChild(row);
+  });
+}
+
+function render(){
+  renderMatches();
+  renderTable();
+}
+
+function resetChampionship(){
+  teams = [];
+  matches = [];
+  render();
+}
+</script>
+
+</body>
+</html>
