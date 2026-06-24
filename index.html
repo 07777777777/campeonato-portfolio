@@ -46,11 +46,20 @@ button{
   padding:12px;
   border-radius:10px;
   transition:0.25s;
+  border-left:4px solid transparent;
+  border-right:4px solid transparent;
 }
 
 .match:hover{
-  transform:scale(1.02);
-  box-shadow:0 0 15px rgba(0,230,118,0.25);
+  transform:translateY(-3px);
+  box-shadow:0 10px 25px rgba(0,0,0,0.6);
+}
+
+/* JOGO FINALIZADO (O QUE VOCÊ QUERIA) */
+.match.done{
+  opacity:0.55;
+  border-left:5px solid #00e676;
+  border-right:5px solid #00e676;
 }
 
 /* FINALIZADOS */
@@ -61,10 +70,11 @@ button{
   margin:10px auto;
   padding:10px;
   border-radius:10px;
-  border-left:5px solid #00e676;
+  border-left:4px solid #00e676;
+  border-right:4px solid #00e676;
 }
 
-/* TABELA FLUTUANTE FORTE */
+/* TABELA SIMPLES (DEIXAMOS DEPOIS MAIS FORTE) */
 table{
   margin:20px auto;
   width:95%;
@@ -73,13 +83,6 @@ table{
   background:#1c1c1c;
   border-radius:10px;
   overflow:hidden;
-
-  transition:0.3s ease;
-}
-
-table:hover{
-  transform:translateY(-6px);
-  box-shadow:0 15px 30px rgba(0,0,0,0.6);
 }
 
 th{
@@ -91,12 +94,6 @@ th{
 td{
   padding:10px;
   border-bottom:1px solid #333;
-}
-
-/* LÍDER */
-.leader{
-  background:rgba(0,230,118,0.15);
-  font-weight:bold;
 }
 </style>
 </head>
@@ -119,29 +116,9 @@ td{
 <div id="finished"></div>
 </div>
 
-<div class="section">
-<h2>Tabela</h2>
-<table>
-<thead>
-<tr>
-<th>Pos</th>
-<th>Time</th>
-<th>P</th>
-<th>V</th>
-<th>E</th>
-<th>D</th>
-<th>GP</th>
-<th>GC</th>
-<th>SG</th>
-</tr>
-</thead>
-<tbody id="table"></tbody>
-</table>
-</div>
-
 <script>
-let teams = [];
-let matches = [];
+let teams=[];
+let matches=[];
 
 function addTeam(){
   const name=document.getElementById("teamInput").value.trim();
@@ -176,11 +153,13 @@ function play(i,res){
     ga=2;
     A.v++;A.p+=3;
     B.d++;
-  } else if(res==="b"){
+  }
+  else if(res==="b"){
     gb=2;
     B.v++;B.p+=3;
     A.d++;
-  } else {
+  }
+  else{
     ga=1;gb=1;
     A.e++;B.e++;
     A.p++;B.p++;
@@ -221,58 +200,28 @@ function renderFinished(){
   const div=document.getElementById("finished");
   div.innerHTML="";
 
-  const done = matches.filter(m=>m.played);
+  const finished = matches.filter(m=>m.played);
 
-  if(done.length===0){
-    div.innerHTML="<p>Nenhum jogo finalizado</p>";
+  if(finished.length===0){
+    div.innerHTML="<p>Nenhum jogo finalizado ainda</p>";
     return;
   }
 
-  done.forEach(m=>{
+  finished.forEach(m=>{
     const el=document.createElement("div");
     el.className="card";
 
     el.innerHTML=`
-      ${teams[m.a].name} ${m.sa} x ${m.sb} ${teams[m.b].name}
+      ${teams[m.a].name} <b>${m.sa}</b> x <b>${m.sb}</b> ${teams[m.b].name}
     `;
 
     div.appendChild(el);
   });
 }
 
-function renderTable(){
-  const t=document.getElementById("table");
-  t.innerHTML="";
-
-  let sorted=[...teams].sort((a,b)=>
-    b.p-a.p||(b.gp-b.gc)-(a.gp-a.gc)
-  );
-
-  sorted.forEach((x,i)=>{
-    const row=document.createElement("tr");
-
-    if(i===0) row.classList.add("leader");
-
-    row.innerHTML=`
-      <td>${i+1}</td>
-      <td>${x.name}</td>
-      <td>${x.p}</td>
-      <td>${x.v}</td>
-      <td>${x.e}</td>
-      <td>${x.d}</td>
-      <td>${x.gp}</td>
-      <td>${x.gc}</td>
-      <td>${x.gp-x.gc}</td>
-    `;
-
-    t.appendChild(row);
-  });
-}
-
 function render(){
   renderMatches();
   renderFinished();
-  renderTable();
 }
 
 function resetChampionship(){
