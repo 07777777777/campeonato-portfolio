@@ -49,31 +49,31 @@ button{
 }
 
 .match:hover{
-  transform:translateY(-3px);
-  box-shadow:0 10px 25px rgba(0,230,118,0.15);
+  transform:translateY(-4px);
+  box-shadow:0 10px 25px rgba(0,230,118,0.2);
 }
 
-/* RESULTADOS FINALIZADOS (AQUI É O FOCO) */
+/* JOGOS FINALIZADOS (FLUTUAÇÃO REAL) */
 .card{
   background:#111;
   width:90%;
   max-width:700px;
   margin:10px auto;
-  padding:12px;
+  padding:14px;
   border-radius:10px;
 
-  border-left:4px solid #00e676;
-  border-right:4px solid #00e676;
+  border-left:5px solid #00e676;
+  border-right:5px solid #00e676;
 
   transition:0.25s;
 }
 
 .card:hover{
-  transform:translateY(-5px);
+  transform:translateY(-6px);
   box-shadow:0 15px 30px rgba(0,230,118,0.25);
 }
 
-/* TABELA */
+/* TABELA COMPLETA */
 table{
   margin:20px auto;
   width:95%;
@@ -82,12 +82,6 @@ table{
   background:#1c1c1c;
   border-radius:10px;
   overflow:hidden;
-  transition:0.25s;
-}
-
-table:hover{
-  transform:translateY(-4px);
-  box-shadow:0 10px 25px rgba(0,0,0,0.6);
 }
 
 th{
@@ -101,7 +95,7 @@ td{
   border-bottom:1px solid #333;
 }
 
-/* PRIMEIRO LUGAR DESTACADO */
+/* 1º LUGAR DESTACADO */
 .leader{
   background:rgba(0,230,118,0.18);
   font-weight:bold;
@@ -115,7 +109,7 @@ td{
 
 <input id="teamInput" placeholder="Nome do time">
 <button class="add" onclick="addTeam()">Adicionar</button>
-<button class="reset" onclick="resetChampionship()">Resetar</button>
+<button class="reset" onclick="reset()">Resetar</button>
 
 <div class="section">
 <h2>Jogos</h2>
@@ -206,28 +200,7 @@ function play(i,res){
   render();
 }
 
-function renderMatches(){
-  const div=document.getElementById("matches");
-  div.innerHTML="";
-
-  matches.forEach((m,i)=>{
-    if(m.played) return;
-
-    const el=document.createElement("div");
-    el.className="match";
-
-    el.innerHTML=`
-      ${teams[m.a].name} vs ${teams[m.b].name}<br><br>
-      <button onclick="play(${i},'a')">${teams[m.a].name}</button>
-      <button onclick="play(${i},'e')">Empate</button>
-      <button onclick="play(${i},'b')">${teams[m.b].name}</button>
-    `;
-
-    div.appendChild(el);
-  });
-}
-
-/* RESULTADOS FINALIZADOS (CORRIGIDO) */
+/* JOGOS FINALIZADOS */
 function renderFinished(){
   const div=document.getElementById("finished");
   div.innerHTML="";
@@ -244,13 +217,13 @@ function renderFinished(){
   });
 }
 
-/* TABELA */
+/* TABELA COMPLETA */
 function renderTable(){
   const t=document.getElementById("table");
   t.innerHTML="";
 
   let sorted=[...teams].sort((a,b)=>
-    b.p-a.p||(b.gp-b.gc)-(a.gp-a.gc)
+    b.p-a.p || (b.gp-b.gc)-(a.gp-a.gc)
   );
 
   sorted.forEach((x,i)=>{
@@ -275,12 +248,30 @@ function renderTable(){
 }
 
 function render(){
-  renderMatches();
+  const div=document.getElementById("matches");
+  div.innerHTML="";
+
+  matches.forEach((m,i)=>{
+    if(m.played) return;
+
+    const el=document.createElement("div");
+    el.className="match";
+
+    el.innerHTML=`
+      ${teams[m.a].name} vs ${teams[m.b].name}<br><br>
+      <button onclick="play(${i},'a')">${teams[m.a].name}</button>
+      <button onclick="play(${i},'e')">Empate</button>
+      <button onclick="play(${i},'b')">${teams[m.b].name}</button>
+    `;
+
+    div.appendChild(el);
+  });
+
   renderFinished();
   renderTable();
 }
 
-function resetChampionship(){
+function reset(){
   teams=[];
   matches=[];
   render();
