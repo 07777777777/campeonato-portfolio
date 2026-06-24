@@ -50,16 +50,16 @@ button{
 
 .match:hover{
   transform:scale(1.02);
+  box-shadow:0 0 12px rgba(0,230,118,0.2);
 }
 
-/* FINALIZADO */
 .match.done{
-  opacity:0.5;
+  opacity:0.45;
   border-left:5px solid #00e676;
   pointer-events:none;
 }
 
-/* CARD FINALIZADO */
+/* FINALIZADOS */
 .card{
   background:#111;
   width:90%;
@@ -68,12 +68,6 @@ button{
   padding:10px;
   border-radius:10px;
   border-left:4px solid #00e676;
-  animation:fade 0.3s ease;
-}
-
-@keyframes fade{
-  from{opacity:0; transform:translateY(5px);}
-  to{opacity:1; transform:translateY(0);}
 }
 
 /* TABELA */
@@ -85,11 +79,12 @@ table{
   background:#1c1c1c;
   border-radius:10px;
   overflow:hidden;
-  transition:0.2s;
+  transition:0.25s ease;
 }
 
 table:hover{
-  transform:scale(1.01);
+  transform:translateY(-4px);
+  box-shadow:0 10px 25px rgba(0,0,0,0.6);
 }
 
 th{
@@ -103,7 +98,6 @@ td{
   border-bottom:1px solid #333;
 }
 
-/* LÍDER */
 .leader{
   background:rgba(0,230,118,0.15);
   font-weight:bold;
@@ -157,11 +151,7 @@ function addTeam(){
   const name=document.getElementById("teamInput").value.trim();
   if(!name) return;
 
-  teams.push({
-    name,
-    p:0,v:0,e:0,d:0,
-    gp:0,gc:0
-  });
+  teams.push({name,p:0,v:0,e:0,d:0,gp:0,gc:0});
 
   document.getElementById("teamInput").value="";
   generateMatches();
@@ -172,7 +162,13 @@ function generateMatches(){
   matches=[];
   for(let i=0;i<teams.length;i++){
     for(let j=i+1;j<teams.length;j++){
-      matches.push({a:i,b:j,played:false,sa:0,sb:0});
+      matches.push({
+        a:i,
+        b:j,
+        played:false,
+        sa:0,
+        sb:0
+      });
     }
   }
 }
@@ -186,9 +182,23 @@ function play(i,res){
 
   let ga=0,gb=0;
 
-  if(res==="a"){ga=2;A.v++;A.p+=3;B.d++;}
-  if(res==="b"){gb=2;B.v++;B.p+=3;A.d++;}
-  if(res==="e"){ga=1;gb=1;A.e++;B.e++;A.p++;B.p++;}
+  if(res==="a"){
+    ga=2;
+    A.v++;A.p+=3;
+    B.d++;
+  }
+
+  if(res==="b"){
+    gb=2;
+    B.v++;B.p+=3;
+    A.d++;
+  }
+
+  if(res==="e"){
+    ga=1;gb=1;
+    A.e++;B.e++;
+    A.p++;B.p++;
+  }
 
   A.gp+=ga;A.gc+=gb;
   B.gp+=gb;B.gc+=ga;
@@ -225,7 +235,14 @@ function renderFinished(){
   const div=document.getElementById("finished");
   div.innerHTML="";
 
-  matches.filter(m=>m.played).forEach(m=>{
+  const finished = matches.filter(m=>m.played);
+
+  if(finished.length===0){
+    div.innerHTML="<p>Nenhum jogo finalizado ainda</p>";
+    return;
+  }
+
+  finished.forEach(m=>{
     const el=document.createElement("div");
     el.className="card";
 
